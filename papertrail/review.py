@@ -6,10 +6,13 @@ import re
 import shutil
 import tempfile
 import uuid
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
 from .materials import load_project
+from .privacy import scan_anonymity
+from .review_report import render_html
 
 # Original checklist: applicability depends on design, not a universal journal score.
 CHECKS = {
@@ -31,7 +34,13 @@ def _text(path):
         return path.read_text(encoding="utf-8-sig"), "UTF-8全文；行號定位"
     if path.suffix.lower() == ".docx":
         from docx import Document
-        doc = Document(path)
+        from docx.opc.exceptions import PackageNotFoundError
+        from zipfile import BadZipFile
+        from lxml.etree import XMLSyntaxError
+        try:
+            doc = Document(path)
+        except (PackageNotFoundError, BadZipFile, XMLSyntaxError, KeyError) as exc:
+            raise ValueError("無法讀取 DOCX，請確認是有效且未加密的 Word 檔") from exc
         parts = [p.text for p in doc.paragraphs]
         parts.extend(" | ".join(c.text for c in row.cells) for t in doc.tables for row in t.rows)
         return "\n".join(parts), "DOCX正文段落及表格文字；不是原頁碼，未覆蓋註腳、修訂標記、圖像與文字方塊"
@@ -75,12 +84,15 @@ def review(manuscript, input_dir, out, protocol=None, claims=None):
     ledger = _object_file(claims, [])
     if not isinstance(ledger, list):
         raise ValueError("claims 須為陣列")
-    findings, links, seen = [], [], set()
+    findings, links, seen, claim_checks = [], [], set(), []
 
     def add(severity, location, issue, action):
         findings.append({"id": f"F{len(findings)+1:03}", "severity": severity,
                          "location": location, "issue": issue, "action": action,
                          "decision": "待作者判斷"})
+
+    for flag in scan_anonymity(manuscript, text):
+        add("匿名風險", flag["location"], flag["issue"], flag["action"])
 
     for key, question in CHECKS.items():
         if key not in procedure:
@@ -106,43 +118,68 @@ def review(manuscript, input_dir, out, protocol=None, claims=None):
         if not sources:
             add("需處理", claim["id"], "主張尚未連到來源", "補來源或限制主張；不得補造文獻。")
         for link in sources:
-            if not isinstance(link, dict) or link.get("id") not in project.sources:
+            if not isinstance(link, dict) or not isinstance(link.get("id"), str) or link["id"] not in project.sources:
                 raise ValueError("主張引用未知來源")
             source = project.sources[link["id"]]
             if source.kind == "question":
                 raise ValueError("研究問題 Q 不能當作主張的事實證據")
             relation = link.get("relation")
-            if relation not in RELATIONS:
+            if not isinstance(relation, str) or relation not in RELATIONS:
                 raise ValueError("來源 relation 須為 supports/contradicts/context/uncertain")
             locator = link.get("locator", "")
             if not isinstance(locator, str):
                 raise ValueError("來源 locator 須為文字")
             if not locator.strip():
                 add("需處理", claim["id"], "來源缺少主張層級定位", "填寫原文頁、節、段或資料列，不用DOI存在代替支持判斷。")
+            if source.kind == "reference" and source.reading_status != "full_text_read":
+                add("人工覆核", claim["id"] + " / " + source.id, "來源尚未登記全文核讀", "先核原文與主張定位；已有書目或節錄不等於已驗證支持關係。")
             # Relations and status are author assertions, never semantic validation.
             links.append([claim["id"], claim["manuscript_locator"], claim["statement"],
                           source.id, locator, relation, source.reading_status,
                           "作者登記；支持關係待人工核對"])
         if sources and not any(s["relation"] == "supports" for s in sources):
             add("需處理", claim["id"], "沒有登記直接支持關係", "背景或反對來源不能自動算支持；若為作者推論，另說明推導與限制。")
+        claim_checks.append({"id": claim["id"], "location": claim["manuscript_locator"],
+                             "exact_text_found": claim["statement"] in text,
+                             "source_ids": sorted({s["id"] for s in sources}),
+                             "relations": dict(Counter(s["relation"] for s in sources))})
     for line_no, line in enumerate(text.splitlines(), 1):
         if re.search(r"導致|造成|證明|必然|causes?|proves?", line, re.I):
             add("人工覆核", f"抽取文字第{line_no}行", "偵測到因果或強斷言用語（也可能是否定、引文或假設）", "逐句判讀設計、反例與保留語；本工具不自動改寫、不判定因果成立。")
-    for marker in re.findall(r"\[@([^\]]+)\]", text):
+    markers = Counter(re.findall(r"\[@([^\]]+)\]", text))
+    for marker in markers:
         if marker not in project.sources:
             add("需處理", "引註 " + marker, "稿件標記不在材料來源表", "核對識別碼及原始文獻。")
+    sources = [{"id": s.id, "reading_status": s.reading_status,
+                "claim_count": len({row[0] for row in links if row[3] == s.id}),
+                "marker_count": markers[s.id]}
+               for s in project.sources.values() if s.kind == "reference"]
+    counts = Counter(f["severity"] for f in findings)
+    summary = {"action_required": counts["需處理"], "missing_information": counts["待補資料"],
+               "human_review": counts["人工覆核"], "anonymity_flags": counts["匿名風險"],
+               "claims_registered": len(ledger), "source_links": len(links),
+               "unknown_markers": sum(marker not in project.sources for marker in markers)}
     parent.mkdir(parents=True, exist_ok=True)
     staging = Path(tempfile.mkdtemp(prefix=".review-", dir=parent))
     try:
         report = {"mode": "review-only-offline", "coverage": coverage,
+                  "schema_version": 2, "summary": summary, "sources": sources, "claim_checks": claim_checks,
                   "input_sha256": hashes, "material_sha256": project.hashes,
                   "protocol": procedure, "findings": findings,
-                  "limitations": ["未上網查核或呼叫模型", "不是國際同行評審認證或錄用預測", "未改稿；未掃描所有敏感資訊；分享前需人工檢查"]}
+                  "limitations": ["未上網查核或呼叫模型", "不是國際同行評審認證或錄用預測", "匿名風險僅規則提示，不保證匿名；未改稿或刪除中繼資料", "DOCX匿名檢查與正文抽取的涵蓋範圍不同；圖片、檔名與間接身分線索仍須人工核對", "未掃描所有敏感資訊；報告及證據CSV分享前需人工檢查"]}
         (staging / "review.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         md = ["# 稿件審查｜不改稿", "", coverage, "", "本報告是離線規則初篩與人工核對清單，不是同行評審或接受保證。已有材料不等於通過；未提供材料不等於稿件缺失。", ""]
+        md.extend(["## 本次摘要", f"需處理 {summary['action_required']}；待補資料 {summary['missing_information']}；人工覆核 {summary['human_review']}；匿名風險 {summary['anonymity_flags']}。", "這些數量不是品質分數。零提示不表示匿名或可投稿。", "先核風險及需處理項目，再填 decisions.csv；未自動採納任何修改。", "", "## 文獻核讀與連結", "| 來源ID | 核讀狀態（作者登記） | 連結主張數 | 稿內標記數 |", "| --- | --- | --- | --- |"])
+        md.extend(f"| {s['id']} | {s['reading_status']} | {s['claim_count']} | {s['marker_count']} |" for s in sources)
+        md.append("")
         for f in findings:
             md.extend([f"## {f['id']}｜{f['severity']}｜{f['location']}", f["issue"], f["action"], "決策：待作者判斷。", ""])
         (staging / "review.md").write_text("\n".join(md), encoding="utf-8")
+        (staging / "review.html").write_text(render_html(report, sources), encoding="utf-8")
+        with (staging / "decisions.csv").open("w", newline="", encoding="utf-8-sig") as f:
+            writer = csv.writer(f)
+            writer.writerow(["finding_id", "決策（接受/部分接受/不接受/待查）", "理由", "補充證據", "修訂版本與位置"])
+            writer.writerows([[finding["id"], "待查", "", "", ""] for finding in findings])
         with (staging / "claim-evidence.csv").open("w", newline="", encoding="utf-8-sig") as f:
             writer = csv.writer(f)
             writer.writerow(["主張ID", "稿件定位", "主張", "來源ID", "原文定位", "支持關係", "核讀狀態", "查核界線"])
