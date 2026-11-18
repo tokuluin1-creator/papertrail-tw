@@ -1,0 +1,20 @@
+[
+  {
+    "id": "R-sandve2013",
+    "title": "Ten Simple Rules for Reproducible Computational Research",
+    "locator": "Rule 1",
+    "reading_note": "Sandve 等人建議，研究者應留下足以說明每項結果如何產生的紀錄。本文借用這項原則檢視引文筆記。另一位讀者拿到筆記後，找得到當初支持這句話的材料嗎？",
+    "note_citation": "Geir Kjetil Sandve et al., “Ten Simple Rules for Reproducible Computational Research,” PLOS Computational Biology 9, no. 10 (2013): e1003285",
+    "bibliography": "Sandve, Geir Kjetil, Anton Nekrutenko, James Taylor, and Eivind Hovig. “Ten Simple Rules for Reproducible Computational Research.” PLOS Computational Biology 9, no. 10 (2013): e1003285.",
+    "url": "https://doi.org/10.1371/journal.pcbi.1003285"
+  },
+  {
+    "id": "R-prov2013",
+    "title": "PROV-DM: The PROV Data Model",
+    "locator": "第 2.1.1 節及第 2.1.2 節",
+    "reading_note": "世界資訊網協會的 PROV 資料模型區分實體、活動及衍生關係。依這個區分，原文和筆記可以分別登錄，再說明筆記如何取材自原文。這套模型能指引資料欄位的設計，回查耗時仍須另外測量。",
+    "note_citation": "Luc Moreau and Paolo Missier, eds., PROV-DM: The PROV Data Model (W3C, April 30, 2013)",
+    "bibliography": "Moreau, Luc, and Paolo Missier, eds. PROV-DM: The PROV Data Model. W3C Recommendation, April 30, 2013.",
+    "url": "https://www.w3.org/TR/2013/REC-prov-dm-20130430/"
+  }
+]

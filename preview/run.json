@@ -1,0 +1,417 @@
+{
+  "version": "0.1.0",
+  "mode": "extractive",
+  "model": null,
+  "synthetic": true,
+  "input_sha256": {
+    "project.json": "803501e8d55a0ddb5c4573acc27a19a8034fdc5cd6d202ca4043d00488b3a963",
+    "references.json": "123e62f9738fe1b576d9b38c1fe359af8d655eb764c12575c1a05afdbb4d87c5",
+    "notes/design.md": "c0379ce215bbd14f5da2a4a52fd73dcf0bef1d34d4810dbbcc73b7859ec1affd",
+    "notes/observations.md": "d6a0b2c8e4f617995012944d64656dabb62385eeec6044d3d70782120242de9a",
+    "measurements.csv": "356e9be9e17cc5cc9c4ac3384c860cebf0b3849a6a114661a4c7b992120d5754"
+  },
+  "outline": [
+    {
+      "id": "intro",
+      "heading": "研究問題",
+      "focus": "筆記多記一個頁碼或小節，回頭找原句時會差多少時間？"
+    },
+    {
+      "id": "literature",
+      "heading": "相關文獻",
+      "focus": "已讀文獻分別能支持哪些說法？"
+    },
+    {
+      "id": "methods",
+      "heading": "研究方法",
+      "focus": "資料從哪裡來，如何記錄與比較？"
+    },
+    {
+      "id": "results",
+      "heading": "研究結果",
+      "focus": "現有紀錄呈現什麼？"
+    },
+    {
+      "id": "discussion",
+      "heading": "討論與限制",
+      "focus": "哪些解釋仍待其他證據檢驗？"
+    }
+  ],
+  "sources": [
+    {
+      "id": "Q",
+      "kind": "question",
+      "section": "intro",
+      "text": "筆記多記一個頁碼或小節，回頭找原句時會差多少時間？",
+      "location": "project.json / question",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "R-sandve2013",
+      "kind": "reference",
+      "section": "literature",
+      "text": "Sandve 等人建議，研究者應留下足以說明每項結果如何產生的紀錄。本文借用這項原則檢視引文筆記。另一位讀者拿到筆記後，找得到當初支持這句話的材料嗎？",
+      "location": "Rule 1",
+      "title": "Ten Simple Rules for Reproducible Computational Research",
+      "citation": "Geir Kjetil Sandve et al., “Ten Simple Rules for Reproducible Computational Research,” PLOS Computational Biology 9, no. 10 (2013): e1003285",
+      "bibliography": "Sandve, Geir Kjetil, Anton Nekrutenko, James Taylor, and Eivind Hovig. “Ten Simple Rules for Reproducible Computational Research.” PLOS Computational Biology 9, no. 10 (2013): e1003285.",
+      "url": "https://doi.org/10.1371/journal.pcbi.1003285",
+      "also": []
+    },
+    {
+      "id": "R-prov2013",
+      "kind": "reference",
+      "section": "literature",
+      "text": "世界資訊網協會的 PROV 資料模型區分實體、活動及衍生關係。依這個區分，原文和筆記可以分別登錄，再說明筆記如何取材自原文。這套模型能指引資料欄位的設計，回查耗時仍須另外測量。",
+      "location": "第 2.1.1 節及第 2.1.2 節",
+      "title": "PROV-DM: The PROV Data Model",
+      "citation": "Luc Moreau and Paolo Missier, eds., PROV-DM: The PROV Data Model (W3C, April 30, 2013)",
+      "bibliography": "Moreau, Luc, and Paolo Missier, eds. PROV-DM: The PROV Data Model. W3C Recommendation, April 30, 2013.",
+      "url": "https://www.w3.org/TR/2013/REC-prov-dm-20130430/",
+      "also": []
+    },
+    {
+      "id": "N-9b763a3d1d",
+      "kind": "note",
+      "section": "intro",
+      "text": "修稿時，書目通常還在，真正難找的是當初據以寫下判斷的那一句。若筆記只留下篇名，作者得再讀一次原文。把頁碼或小節一起記下，查找的路徑便有了較明確的起點。",
+      "location": "notes/design.md 第 3–3 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "N-550301c0ec",
+      "kind": "note",
+      "section": "methods",
+      "text": "本例為六條引文各設計兩種筆記，一種僅記書目，另一種加記原文位置。每條引文在兩種條件下各有一筆模擬時間，計時單位為秒。",
+      "location": "notes/design.md 第 7–7 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "N-1b8a104a72",
+      "kind": "note",
+      "section": "methods",
+      "text": "這裡把「找到引用的原句」定為計時終點。查到原句後，仍要讀上下文，判斷引文能否支持正文的說法。這段判讀所花的時間，另屬一個研究問題。",
+      "location": "notes/design.md 第 9–9 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "N-079eb135ae",
+      "kind": "note",
+      "section": "results",
+      "text": "第 4 條引文值得單獨看。模擬紀錄裡，僅記書目時花了 42 秒，加記位置時花了 46 秒。即使兩組平均有差，回到個別引文，順序也可能倒過來。",
+      "location": "notes/observations.md 第 3–3 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": [
+        "V-C04B",
+        "V-C04L"
+      ]
+    },
+    {
+      "id": "N-776bd8ff25",
+      "kind": "note",
+      "section": "discussion",
+      "text": "這組秒數是為示範程式而設定的。要評估研究者實際能省下多少時間，得另行招募讀者，記錄他們回查原句的過程。",
+      "location": "notes/observations.md 第 7–7 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "N-1e33ae1e8e",
+      "kind": "note",
+      "section": "discussion",
+      "text": "正式施測時，同一個人第二次看到相同引文，可能已經記得原句的位置。可把引文分成兩組，交錯安排兩種筆記的使用順序，再比較結果。",
+      "location": "notes/observations.md 第 9–9 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "V-C01B",
+      "kind": "record",
+      "section": "results",
+      "text": "C01 的「僅記書目」回查時間為 82 秒。",
+      "location": "measurements.csv 第 2 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "V-C01L",
+      "kind": "record",
+      "section": "results",
+      "text": "C01 的「加記原文位置」回查時間為 31 秒。",
+      "location": "measurements.csv 第 3 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "V-C02B",
+      "kind": "record",
+      "section": "results",
+      "text": "C02 的「僅記書目」回查時間為 73 秒。",
+      "location": "measurements.csv 第 4 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "V-C02L",
+      "kind": "record",
+      "section": "results",
+      "text": "C02 的「加記原文位置」回查時間為 35 秒。",
+      "location": "measurements.csv 第 5 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "V-C03B",
+      "kind": "record",
+      "section": "results",
+      "text": "C03 的「僅記書目」回查時間為 96 秒。",
+      "location": "measurements.csv 第 6 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "V-C03L",
+      "kind": "record",
+      "section": "results",
+      "text": "C03 的「加記原文位置」回查時間為 50 秒。",
+      "location": "measurements.csv 第 7 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "V-C04B",
+      "kind": "record",
+      "section": "results",
+      "text": "C04 的「僅記書目」回查時間為 42 秒。",
+      "location": "measurements.csv 第 8 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "V-C04L",
+      "kind": "record",
+      "section": "results",
+      "text": "C04 的「加記原文位置」回查時間為 46 秒。",
+      "location": "measurements.csv 第 9 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "V-C05B",
+      "kind": "record",
+      "section": "results",
+      "text": "C05 的「僅記書目」回查時間為 88 秒。",
+      "location": "measurements.csv 第 10 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "V-C05L",
+      "kind": "record",
+      "section": "results",
+      "text": "C05 的「加記原文位置」回查時間為 34 秒。",
+      "location": "measurements.csv 第 11 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "V-C06B",
+      "kind": "record",
+      "section": "results",
+      "text": "C06 的「僅記書目」回查時間為 87 秒。",
+      "location": "measurements.csv 第 12 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "V-C06L",
+      "kind": "record",
+      "section": "results",
+      "text": "C06 的「加記原文位置」回查時間為 32 秒。",
+      "location": "measurements.csv 第 13 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "D-03b6213714",
+      "kind": "data",
+      "section": "results",
+      "text": "「僅記書目」共 6 筆，回查時間平均為 78 秒。",
+      "location": "measurements.csv 第 2, 4, 6, 8, 10, 12 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    },
+    {
+      "id": "D-4193ffaca6",
+      "kind": "data",
+      "section": "results",
+      "text": "「加記原文位置」共 6 筆，回查時間平均為 38 秒。",
+      "location": "measurements.csv 第 3, 5, 7, 9, 11, 13 行",
+      "title": "",
+      "citation": "",
+      "bibliography": "",
+      "url": "",
+      "also": []
+    }
+  ],
+  "paragraphs": [
+    {
+      "id": "A",
+      "section": "摘要",
+      "text": "筆記多記一個頁碼或小節，回頭找原句時會差多少時間？本例為六條引文各設計兩種筆記，一種僅記書目，另一種加記原文位置。每條引文在兩種條件下各有一筆模擬時間，計時單位為秒。「僅記書目」共 6 筆，回查時間平均為 78 秒。「加記原文位置」共 6 筆，回查時間平均為 38 秒。這組秒數是為示範程式而設定的。要評估研究者實際能省下多少時間，得另行招募讀者，記錄他們回查原句的過程。",
+      "sources": [
+        "Q",
+        "N-550301c0ec",
+        "D-03b6213714",
+        "D-4193ffaca6",
+        "N-776bd8ff25"
+      ]
+    },
+    {
+      "id": "intro.1",
+      "section": "研究問題",
+      "text": "修稿時，書目通常還在，真正難找的是當初據以寫下判斷的那一句。若筆記只留下篇名，作者得再讀一次原文。把頁碼或小節一起記下，查找的路徑便有了較明確的起點。",
+      "sources": [
+        "N-9b763a3d1d"
+      ]
+    },
+    {
+      "id": "literature.1",
+      "section": "相關文獻",
+      "text": "Sandve 等人建議，研究者應留下足以說明每項結果如何產生的紀錄。本文借用這項原則檢視引文筆記。另一位讀者拿到筆記後，找得到當初支持這句話的材料嗎？",
+      "sources": [
+        "R-sandve2013"
+      ]
+    },
+    {
+      "id": "literature.2",
+      "section": "相關文獻",
+      "text": "世界資訊網協會的 PROV 資料模型區分實體、活動及衍生關係。依這個區分，原文和筆記可以分別登錄，再說明筆記如何取材自原文。這套模型能指引資料欄位的設計，回查耗時仍須另外測量。",
+      "sources": [
+        "R-prov2013"
+      ]
+    },
+    {
+      "id": "methods.1",
+      "section": "研究方法",
+      "text": "本例為六條引文各設計兩種筆記，一種僅記書目，另一種加記原文位置。每條引文在兩種條件下各有一筆模擬時間，計時單位為秒。",
+      "sources": [
+        "N-550301c0ec"
+      ]
+    },
+    {
+      "id": "methods.2",
+      "section": "研究方法",
+      "text": "這裡把「找到引用的原句」定為計時終點。查到原句後，仍要讀上下文，判斷引文能否支持正文的說法。這段判讀所花的時間，另屬一個研究問題。",
+      "sources": [
+        "N-1b8a104a72"
+      ]
+    },
+    {
+      "id": "results.1",
+      "section": "研究結果",
+      "text": "「僅記書目」共 6 筆，回查時間平均為 78 秒。「加記原文位置」共 6 筆，回查時間平均為 38 秒。",
+      "sources": [
+        "D-03b6213714",
+        "D-4193ffaca6"
+      ]
+    },
+    {
+      "id": "results.2",
+      "section": "研究結果",
+      "text": "第 4 條引文值得單獨看。模擬紀錄裡，僅記書目時花了 42 秒，加記位置時花了 46 秒。即使兩組平均有差，回到個別引文，順序也可能倒過來。",
+      "sources": [
+        "N-079eb135ae",
+        "V-C04B",
+        "V-C04L"
+      ]
+    },
+    {
+      "id": "discussion.1",
+      "section": "討論與限制",
+      "text": "這組秒數是為示範程式而設定的。要評估研究者實際能省下多少時間，得另行招募讀者，記錄他們回查原句的過程。",
+      "sources": [
+        "N-776bd8ff25"
+      ]
+    },
+    {
+      "id": "discussion.2",
+      "section": "討論與限制",
+      "text": "正式施測時，同一個人第二次看到相同引文，可能已經記得原句的位置。可把引文分成兩組，交錯安排兩種筆記的使用順序，再比較結果。",
+      "sources": [
+        "N-1e33ae1e8e"
+      ]
+    }
+  ],
+  "review": [
+    [
+      "results.1",
+      "個案與組平均方向不同",
+      "兩組有 1 筆配對與整體平均的方向相反。例如 C04 在「僅記書目」為 42 秒，在「加記原文位置」為 46 秒。說明平均差異時，請一併檢視這些個案。"
+    ]
+  ]
+}

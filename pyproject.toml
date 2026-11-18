@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "papertrail-tw"
+version = "0.1.0"
+description = "從研究筆記編製可回查來源的繁體中文論文草稿"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+dependencies = ["matplotlib>=3.7,<4", "python-docx>=1.1,<2"]
+
+[project.scripts]
+papertrail = "papertrail.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["papertrail"]
+
+[tool.setuptools.package-data]
+papertrail = ["*.tex"]

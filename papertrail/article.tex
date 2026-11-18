@@ -1,0 +1,31 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{fontspec}
+\usepackage{graphicx}
+\usepackage[hidelinks,breaklinks=true]{hyperref}
+\urlstyle{same}
+\IfFontExistsTF{Noto Serif CJK TC}{\setmainfont{Noto Serif CJK TC}}{%
+  \IfFontExistsTF{PMingLiU}{\setmainfont{PMingLiU}}{\setmainfont{PingFang TC}}}
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip=0pt plus 0.5pt
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt plus 1pt}
+\setlength{\emergencystretch}{3em}
+\renewcommand{\baselinestretch}{1.27}
+\setcounter{secnumdepth}{0}
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0pt}
+  {1.05\baselineskip plus .2\baselineskip}{.32\baselineskip}
+  {\normalfont\large\bfseries}}
+\makeatother
+\raggedbottom
+\begin{document}
+{\noindent\fontsize{22}{30}\selectfont\bfseries @@TITLE@@\par}
+{\small @@BYLINE@@\par}
+\vspace{0.35em}
+{\bfseries 摘要}\par
+@@ABSTRACT@@
+\par{\small @@KEYWORDS@@}\par
+@@BODY@@
+@@REFERENCES@@
+\end{document}

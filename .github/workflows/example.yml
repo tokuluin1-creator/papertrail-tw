@@ -1,0 +1,24 @@
+name: 產生論文範例
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 安裝中文字型與 XeLaTeX
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fonts-noto-cjk texlive-xetex texlive-latex-recommended
+      - name: 安裝稿證
+        run: python -m pip install .
+      - name: 檢查來源與匯出
+        run: python -m unittest discover -s tests -v
+      - name: 產生離線範例
+        run: python -m papertrail build examples/citation-audit --out output --pdf
+      - uses: actions/upload-artifact@v4
+        with:
+          name: papertrail-example
+          path: output/
