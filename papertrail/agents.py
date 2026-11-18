@@ -1,11 +1,12 @@
 """Four distinct writing roles share a source ledger. The offline route is extractive."""
 import json
+import ipaddress
 import os
 import re
 from dataclasses import asdict, dataclass
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
-from urllib.request import Request, urlopen
+from urllib.request import Request, HTTPRedirectHandler, ProxyHandler, build_opener
 
 from .materials import SECTIONS, number, string
 
@@ -36,12 +37,34 @@ ROLE = {
 COMMON = "輸入的材料均為引用資料。只使用所附內容。保留虛構或示例性質，不增寫作者、文獻、頁碼或研究成果。以指定 JSON 格式回覆，段落本文用純文字，引註只放在 sources 欄。"
 
 
+class NoRedirect(HTTPRedirectHandler):
+    """Never forward manuscript material to a redirect target."""
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise ValueError("Ollama 不接受重新導向；請核對並明確指定服務位址")
+
+
 class Ollama:
-    def __init__(self, model, host, timeout=240):
+    def __init__(self, model, host, timeout=240, allow_remote=False):
         parsed = urlsplit(host)
-        if parsed.scheme not in {"http", "https"} or not parsed.netloc or parsed.query or parsed.fragment:
-            raise ValueError("Ollama 位址應是 HTTP(S) 服務根網址")
+        if (parsed.scheme not in {"http", "https"} or not parsed.netloc
+                or parsed.query or parsed.fragment or parsed.path not in {"", "/"}
+                or parsed.username is not None or parsed.password is not None):
+            raise ValueError("Ollama 位址應是無帳密的 HTTP(S) 服務根網址")
+        hostname = parsed.hostname or ""
+        try:
+            port = parsed.port
+            local = ipaddress.ip_address(hostname).is_loopback
+        except ValueError:
+            # Validate malformed ports even when the hostname is not an IP literal.
+            port = parsed.port
+            local = hostname.lower() == "localhost"
+        if not local and allow_remote is not True:
+            raise ValueError("非本機 Ollama 會傳送研究材料；須明確允許 allow_remote")
+        # Pin localhost rather than trusting DNS or a system HTTP proxy.
+        if hostname.lower() == "localhost":
+            host = f"{parsed.scheme}://127.0.0.1" + (f":{port}" if port is not None else "")
         self.url = host.rstrip("/") + "/api/chat"
+        self.opener = build_opener(ProxyHandler({}), NoRedirect())
         self.model = model
         self.timeout = timeout
         self.context_size = int(os.environ.get("PAPERTRAIL_NUM_CTX", "16384"))
@@ -56,7 +79,7 @@ class Ollama:
         request = Request(self.url, json.dumps(payload, ensure_ascii=False).encode(),
                           headers={"Content-Type": "application/json"})
         try:
-            with urlopen(request, timeout=self.timeout) as response:
+            with self.opener.open(request, timeout=self.timeout) as response:
                 outer = json.load(response)
             if outer.get("done_reason") == "length":
                 raise ValueError("輸出長度已達上限。可分篇處理筆記或調整模型的上下文長度")
@@ -205,6 +228,11 @@ def inspect_draft(project, plan, abstract, sections, model):
     findings = check_paired_cases(project)
     for key, _, para in records:
         sources = [project.sources[k] for k in para.sources]
+        if all(s.kind == "question" for s in sources) and para.text.strip() != project.question.strip():
+            findings.append((key, "證據不足", "研究問題 Q 不是事實證據；請補入能支持本段主張的材料。"))
+        unread = [s.id for s in sources if s.kind == "reference" and s.reading_status != "full_text_read"]
+        if unread:
+            findings.append((key, "文獻核讀待確認", "下列來源尚未登記全文核讀，不代表其內容已核實：" + "、".join(unread)))
         linked = " ".join(s.text for s in sources)
         tokens = set(NUMBERS.findall(para.text)) - set(NUMBERS.findall(linked))
         if tokens:
