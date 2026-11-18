@@ -4,7 +4,9 @@
 
 第一次使用，可以直接看範例。兩種引文筆記的模擬回查時間平均為 78 秒和 38 秒，第 4 條引文卻出現相反結果。審查筆記指出了這個例外，證據表則列出對應資料。範例的書目可回查原文，所有計時數值皆為教學用模擬資料。
 
-[讀 PDF 範例](preview/draft.pdf) · [下載 Word 範例](preview/draft.docx) · [看證據表](preview/evidence.csv) · [看審查筆記](preview/review.md)
+[手機閱讀全文](preview/draft.md) · [逐頁看原稿](preview/README.md) · [下載 PDF](preview/draft.pdf?raw=true) · [下載 Word](preview/draft.docx?raw=true)
+
+[看證據表](preview/evidence.csv) · [看審查筆記](preview/review.md)
 
 ## 在自己的電腦上試跑
 
