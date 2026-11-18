@@ -46,6 +46,7 @@ class Source:
     bibliography: str = ""
     url: str = ""
     also: tuple = ()
+    reading_status: str = "unverified"
 
 
 @dataclass(frozen=True)
@@ -129,9 +130,12 @@ def reference_cards(content):
         url = card.get("url", "")
         if not isinstance(url, str) or (url and not re.fullmatch(r"https?://[^\s<>]+", url)):
             raise ValueError(f"{place} 的 url 需是完整的 http(s) 網址，紙本可留空")
+        status = card.get("reading_status", "unverified")
+        if not isinstance(status, str) or status not in {"unverified", "metadata_only", "excerpt_read", "full_text_read"}:
+            raise ValueError(f"{place} 的 reading_status 須為 unverified/metadata_only/excerpt_read/full_text_read")
         yield Source(key, "reference", "literature", string(card, "reading_note", place),
                      string(card, "locator", place), string(card, "title", place),
-                     string(card, "note_citation", place), string(card, "bibliography", place), url)
+                     string(card, "note_citation", place), string(card, "bibliography", place), url, reading_status=status)
 
 
 def measurement_groups(content, metric, unit):

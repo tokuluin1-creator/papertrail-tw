@@ -23,6 +23,8 @@ python -m papertrail build examples/citation-audit --out output
 
 ## 啟用多代理寫作
 
+已有稿件而只想先審查時，請用 `python -m papertrail review 稿件.docx --project 研究材料目錄 --out reviews`，不要執行 `build`。此新路徑離線產生社會科學文獻研究清單、可定位疑點與主張證據表，不修改原稿、不呼叫模型；作者決定後才另行修訂。詳見[先審後改與核對範圍](docs/review-first.md)。
+
 預設的離線模式會按筆記標題編排段落，採用作者填寫的讀書摘要，從 CSV 計算平均數，並用規則檢查草稿。安裝依賴後，這條路徑可以離線執行，全程不需要 API 金鑰。
 
 要從零散日誌撰寫新段落，可啟動本機 Ollama 服務，選用 `ollama list` 已列出的、支援結構化輸出的指令模型。下列指令的 `MODEL_NAME` 請換成完整模型名稱。
@@ -40,7 +42,7 @@ python -m papertrail build examples/citation-audit --model MODEL_NAME --out outp
 
 計算、畫圖和排版均由 Python 完成。模型若回傳不存在的來源，該次執行會指出錯誤，方便修改輸入後重跑。審查意見另存於 `review.md`，由作者決定如何改稿。
 
-Ollama 預設連線至本機的 `http://127.0.0.1:11434`。使用其他主機時，可指定 `--ollama-url`。參與該階段的研究材料會傳給所指定的主機。較長的筆記可以分篇處理，也可依模型和電腦記憶體調整 `PAPERTRAIL_NUM_CTX`，預設值為 16384。
+Ollama 預設連線至本機的 `http://127.0.0.1:11434`。使用其他主機時，可指定 `--ollama-url`，非loopback端點另需 `--allow-remote` 明確許可。參與該階段的研究材料會傳給所指定的主機，傳送前請先確認敏感資訊、資料權限與端點信任。較長的筆記可以分篇處理，也可依模型和電腦記憶體調整 `PAPERTRAIL_NUM_CTX`，預設值為 16384。
 
 ## 放入自己的資料
 
