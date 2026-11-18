@@ -25,6 +25,8 @@ python -m papertrail build examples/citation-audit --out output
 
 已有稿件而只想先審查時，請用 `python -m papertrail review 稿件.docx --project 研究材料目錄 --out reviews`，不要執行 `build`。此新路徑離線產生社會科學文獻研究清單、可定位疑點與主張證據表，不修改原稿、不呼叫模型；作者決定後才另行修訂。詳見[先審後改與核對範圍](docs/review-first.md)。
 
+打開輸出目錄的 `review.html` 可看風險摘要、文獻核讀與主張來源狀態；`decisions.csv` 留給作者逐項回覆。新增匿名風險初篩只標記可辨識線索及DOCX中繼資料／批註／修訂風險，**不自動匿名化，也不保證零提示即匿名通過**。
+
 預設的離線模式會按筆記標題編排段落，採用作者填寫的讀書摘要，從 CSV 計算平均數，並用規則檢查草稿。安裝依賴後，這條路徑可以離線執行，全程不需要 API 金鑰。
 
 要從零散日誌撰寫新段落，可啟動本機 Ollama 服務，選用 `ollama list` 已列出的、支援結構化輸出的指令模型。下列指令的 `MODEL_NAME` 請換成完整模型名稱。
