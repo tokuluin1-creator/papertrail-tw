@@ -50,7 +50,8 @@ class ReviewTests(unittest.TestCase):
         p = self.root / "claims.json"
         p.write_text(json.dumps([{"id": "=C1", "statement": "背景材料。", "manuscript_locator": "段2", "sources": [{"id": "R-sandve2013", "relation": "context", "locator": "方法節"}]}]))
         out = self.run_review(claims=p)
-        rows = list(csv.reader((out / "claim-evidence.csv").open(encoding="utf-8-sig")))
+        with (out / "claim-evidence.csv").open(encoding="utf-8-sig") as stream:
+            rows = list(csv.reader(stream))
         self.assertEqual(rows[1][0], "'=C1")
         self.assertIn("沒有登記直接支持", (out / "review.md").read_text())
 
