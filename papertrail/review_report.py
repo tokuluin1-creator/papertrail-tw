@@ -1,5 +1,6 @@
 """Self-contained, escaped HTML; no scripts, remote fonts, or telemetry."""
 from html import escape
+import re
 
 
 STATUS = {"unverified": "未核讀", "metadata_only": "僅書目", "excerpt_read": "已讀節錄", "full_text_read": "登記已讀全文"}
@@ -34,6 +35,16 @@ def render_html(report, sources):
         parts.append('<article><h3>' + h(claim['id']) + '</h3><p>' + h(claim['location']) + '</p><p>原句精確比對：' + ('找到（不等於支持成立）' if claim['exact_text_found'] else '未找到（請核版本／抽取限制）') + '</p><p>不同來源ID：' + str(len(claim['source_ids'])) + '</p><p>作者登記關係：' + h(relationships) + '</p></article>')
     if not report.get('claim_checks'):
         parts.append('<p class="notice">尚未登記主張，不能推定查核覆蓋率。</p>')
+    journal = report.get("journal")
+    if journal:
+        parts.extend(["<h2>投稿規範｜" + h(journal["name"]) + "</h2>",
+                      "<p>" + h(journal["edition"]) + "</p><dl>"])
+        for label, detail in journal["rules"].items():
+            rendered = h(detail)
+            if label == "出處":
+                rendered = re.sub(r"\[([^\]]+)\]\((https://[^\s)]+)\)", r'<a href="\2">\1</a>', rendered)
+            parts.append("<dt><strong>" + h(label) + "</strong></dt><dd>" + rendered + "</dd>")
+        parts.append("</dl>")
     parts.append('<h2>審查項目</h2>')
     priority = {"匿名風險": 0, "需處理": 1, "待補資料": 2, "人工覆核": 3}
     for finding in sorted(report["findings"], key=lambda f: priority.get(f["severity"], 4)):

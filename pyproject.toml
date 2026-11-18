@@ -18,4 +18,4 @@ papertrail = "papertrail.cli:main"
 include = ["papertrail"]
 
 [tool.setuptools.package-data]
-papertrail = ["*.tex"]
+papertrail = ["*.tex", "journal-guides.md"]

@@ -59,10 +59,10 @@ def _cell(value):
     return "'" + value if value.lstrip().startswith(("=", "+", "-", "@")) else value
 
 
-def review(manuscript, input_dir, out, protocol=None, claims=None):
+def review(manuscript, input_dir, out, protocol=None, claims=None, journal=None):
     """Produce a fresh review folder; never rewrite manuscript or claim verification."""
     manuscript = Path(manuscript).resolve()
-    project = load_project(input_dir)
+    project = load_project(input_dir, journal)
     parent = Path(out).resolve()
     if parent == project.root or parent.is_relative_to(project.root):
         raise ValueError("審查輸出請設在研究材料目錄之外")
@@ -95,6 +95,11 @@ def review(manuscript, input_dir, out, protocol=None, claims=None):
         add("匿名風險", flag["location"], flag["issue"], flag["action"])
 
     for key, question in CHECKS.items():
+        if key == "journal_fit" and project.journal:
+            question = f"請依《{project.journal.name}》所附投稿規範逐項比對，並記錄稿件位置與符合情形。"
+            if key not in procedure:
+                add("人工覆核", "protocol / journal_fit", "已載入刊方規範，待核對實際稿件", question)
+                continue
         if key not in procedure:
             add("待補資料", "protocol / " + key, "未提供審查依據，不等於稿件必然缺失", question)
         else:
@@ -167,8 +172,13 @@ def review(manuscript, input_dir, out, protocol=None, claims=None):
                   "input_sha256": hashes, "material_sha256": project.hashes,
                   "protocol": procedure, "findings": findings,
                   "limitations": ["未上網查核或呼叫模型", "不是國際同行評審認證或錄用預測", "匿名風險僅規則提示，不保證匿名；未改稿或刪除中繼資料", "DOCX匿名檢查與正文抽取的涵蓋範圍不同；圖片、檔名與間接身分線索仍須人工核對", "未掃描所有敏感資訊；報告及證據CSV分享前需人工檢查"]}
+        if project.journal:
+            report["journal"] = project.journal.record()
+            (staging / "journal.md").write_text(project.journal.markdown(), encoding="utf-8", newline="\n")
         (staging / "review.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         md = ["# 稿件審查｜不改稿", "", coverage, "", "本報告是離線規則初篩與人工核對清單，不是同行評審或接受保證。已有材料不等於通過；未提供材料不等於稿件缺失。", ""]
+        if project.journal:
+            md.extend([f"投稿目標為《{project.journal.name}》。[核對本次投稿規範與出處](journal.md)", ""])
         md.extend(["## 本次摘要", f"需處理 {summary['action_required']}；待補資料 {summary['missing_information']}；人工覆核 {summary['human_review']}；匿名風險 {summary['anonymity_flags']}。", "這些數量不是品質分數。零提示不表示匿名或可投稿。", "先核風險及需處理項目，再填 decisions.csv；未自動採納任何修改。", "", "## 文獻核讀與連結", "| 來源ID | 核讀狀態（作者登記） | 連結主張數 | 稿內標記數 |", "| --- | --- | --- | --- |"])
         md.extend(f"| {s['id']} | {s['reading_status']} | {s['claim_count']} | {s['marker_count']} |" for s in sources)
         md.append("")
@@ -187,7 +197,7 @@ def review(manuscript, input_dir, out, protocol=None, claims=None):
         for key, path in inputs.items():
             if hashlib.sha256(path.read_bytes()).hexdigest() != hashes[key]:
                 raise ValueError("輸入在審查期間變動，未發布本次報告")
-        if load_project(input_dir).hashes != project.hashes:
+        if load_project(input_dir, journal).hashes != project.hashes:
             raise ValueError("研究材料在審查期間變動，未發布本次報告")
         final = parent / (datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-review-" + uuid.uuid4().hex[:8])
         staging.rename(final)

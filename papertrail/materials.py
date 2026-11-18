@@ -9,6 +9,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from statistics import mean
 
+from .journals import Journal, lookup
+
 SECTIONS = {
     "intro": "研究問題", "literature": "相關文獻", "methods": "研究方法",
     "results": "研究結果", "discussion": "討論與限制",
@@ -76,6 +78,7 @@ class Project:
     sources: dict
     measures: list
     hashes: dict
+    journal: Journal | None = None
 
 
 def number(value):
@@ -177,7 +180,7 @@ def measurement_groups(content, metric, unit):
             for group, (values, rows, cases) in groups.items()], records
 
 
-def load_project(directory):
+def load_project(directory, journal=None):
     root = Path(directory).resolve()
     config = root / "project.json"
     hashes = {}
@@ -188,6 +191,8 @@ def load_project(directory):
         return data.decode("utf-8-sig")
 
     meta = json.loads(content(config))
+    journal_name = journal if journal is not None else meta.get("journal")
+    target = lookup(journal_name) if journal_name is not None else None
     title = string(meta, "title", "project.json")
     question = string(meta, "question", "project.json")
     demo = meta.get("demo", False)
@@ -233,4 +238,4 @@ def load_project(directory):
     if len(bank) == 1:
         raise ValueError("請加入一份研究筆記、已讀書目或數值資料")
     return Project(root, title, question, author.strip(), keywords, demo, metric, group_label, unit,
-                   bank, measures, hashes)
+                   bank, measures, hashes, target)

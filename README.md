@@ -8,6 +8,20 @@
 
 [看證據表](preview/evidence.csv) · [看審查筆記](preview/review.md)
 
+## 指定要投稿的期刊
+
+[24 種期刊投稿規範，按刊名查閱](papertrail/journal-guides.md)
+
+在能讀取這個專案的對話中，可以直接說「這篇要投《海軍雙月刊》，請依稿證規範檢查」。稿證依刊名或簡稱取出篇幅、摘要、引註、版面與送件要求，附上所用版本及出處。涉及不同欄別時會一併列出，例如《中共研究》的短評與專題研究各有字數範圍。
+
+```sh
+python -m papertrail journal "這篇要投海軍雙月刊"
+python -m papertrail review 稿件.docx --project 研究材料目錄 --journal 通識學報
+python -m papertrail build examples/citation-audit --journal 復興崗學報
+```
+
+執行 `python -m papertrail journal` 可看全部刊名和簡稱。在研究材料的 `project.json` 加上 `"journal": "海軍學術雙月刊"` 即可記住投稿目標，單次改投可用 `--journal` 指定。編稿與審查都會保留一份 `journal.md`。審查報告可直接核對條文，使用模型編稿時也會讀取這些規範。Word、LaTeX 的實際版面仍須對照刊方樣張。
+
 ## 在自己的電腦上試跑
 
 使用 Python 3.11 以上版本，並安裝一套繁體中文字型。Windows 可用微軟正黑體，macOS 可用蘋方，Linux 可用 Noto CJK。解壓縮後，進入含有 `pyproject.toml` 的目錄執行以下指令。

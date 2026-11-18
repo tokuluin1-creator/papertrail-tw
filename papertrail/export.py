@@ -302,6 +302,9 @@ def write_audit(project, plan, indexed, findings, model_name, dest):
         outline.extend(["## " + row["heading"], row["focus"]])
     (dest / "outline.md").write_text("\n\n".join(outline) + "\n", encoding="utf-8")
     review = ["# 審查筆記", "本次檢查方式　" + ("Ollama 多代理及規則檢查" if model_name else "離線規則檢查")]
+    if project.journal:
+        (dest / "journal.md").write_text(project.journal.markdown(), encoding="utf-8", newline="\n")
+        review.append(f"投稿目標為《{project.journal.name}》。[查閱本次所用的投稿規範與出處](journal.md)")
     if project.demo:
         review.append(DEMO + "。請以這份輸出練習回查來源。")
     if findings:
@@ -316,6 +319,7 @@ def write_audit(project, plan, indexed, findings, model_name, dest):
         "outline": plan, "sources": [asdict(s) for s in project.sources.values()],
         "paragraphs": [{"id": k, "section": section, **asdict(p)} for k, section, p in indexed],
         "review": findings,
+        **({"journal": project.journal.record()} if project.journal else {}),
     })
 
 

@@ -123,8 +123,12 @@ def excerpt(source, bank):
 
 
 def context(project):
-    return {"title": project.title, "question": project.question, "synthetic_data": project.demo,
+    data = {"title": project.title, "question": project.question, "synthetic_data": project.demo,
             "evidence": [asdict(s) for s in project.sources.values()]}
+    if project.journal:
+        data["editorial_guidance"] = project.journal.markdown()
+        data["editorial_instruction"] = "依所選刊物規範編稿或審查。僅 evidence 中的來源能用來支持研究主張。"
+    return data
 
 
 def plan_sections(project, model):
